@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+  "netcode_shared",
+  "netcode_client",
+  "netcode_server",
+  "sample_binary"
+]
