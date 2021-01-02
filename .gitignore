@@ -11,3 +11,12 @@ Cargo.lock
 
 # Rust log files
 *.log
+
+# Build output files
+build/
+
+# Visual Studio Code configuration files
+.vscode/
+
+# MacOs folder metadata
+.DS_Store
