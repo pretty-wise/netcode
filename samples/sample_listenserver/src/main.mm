@@ -23,6 +23,7 @@
     NSTimer* animationTimer;
     int serverPort;
     NetcodeClient* client;
+    NetcodeServer* server;
 }
 @end
 
@@ -72,12 +73,14 @@ static void cli_get_input(struct simcmd_t* input) {
 #endif
 
     // init
+    server = server_create();
     client = client_create();
 }
 
 -(void)updateAndDrawDemoView
 {
     // update
+    server_update(server);
     client_update(client);
 
     // Start the Dear ImGui frame
@@ -180,6 +183,7 @@ static void cli_get_input(struct simcmd_t* input) {
 
     // destroy
     client_destroy(client);
+    server_destroy(server);
 }
 
 // Forward Mouse/Keyboard events to dear imgui OSX back-end. It returns true when imgui is expecting to use the event.
