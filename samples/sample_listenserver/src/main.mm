@@ -12,6 +12,8 @@
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 
+#include "network.h"
+
 //-----------------------------------------------------------------------------------
 // ImGuiExampleView
 //-----------------------------------------------------------------------------------
@@ -20,6 +22,7 @@
 {
     NSTimer* animationTimer;
     int serverPort;
+    NetcodeClient* client;
 }
 @end
 
@@ -69,11 +72,13 @@ static void cli_get_input(struct simcmd_t* input) {
 #endif
 
     // init
+    client = client_create();
 }
 
 -(void)updateAndDrawDemoView
 {
     // update
+    client_update(client);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL2_NewFrame();
@@ -174,6 +179,7 @@ static void cli_get_input(struct simcmd_t* input) {
     animationTimer = nil;
 
     // destroy
+    client_destroy(client);
 }
 
 // Forward Mouse/Keyboard events to dear imgui OSX back-end. It returns true when imgui is expecting to use the event.
