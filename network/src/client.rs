@@ -25,3 +25,17 @@ pub extern "C" fn client_update(context: *mut NetcodeClient) {
         (*context).test += 1;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::client_create;
+    use super::client_destroy;
+    use super::client_update;
+    #[test]
+    fn instatiation() {
+        let instance = client_create();
+        assert!(!instance.is_null());
+        client_update(instance);
+        client_destroy(instance);
+    }
+}

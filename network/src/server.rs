@@ -25,3 +25,17 @@ pub extern "C" fn server_update(context: *mut NetcodeServer) {
         (*context).test += 1;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::server_create;
+    use super::server_destroy;
+    use super::server_update;
+    #[test]
+    fn instatiation() {
+        let instance = server_create();
+        assert!(!instance.is_null());
+        server_update(instance);
+        server_destroy(instance);
+    }
+}
