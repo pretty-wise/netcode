@@ -1,16 +1,22 @@
+use crate::simserver;
 use crate::socketio;
 use std::{mem::transmute, net::SocketAddr, str::FromStr};
 
 pub struct NetcodeServer {
     io: socketio::Context,
+    simulation: simserver::Context,
 }
 
 #[no_mangle]
 pub extern "C" fn server_create() -> *mut NetcodeServer {
     let local_addr = SocketAddr::from_str("127.0.0.1:0").unwrap();
     let (socket_io, _port) = socketio::Context::new(local_addr);
+    let simulation = simserver::Context::start();
 
-    let context = Box::new(NetcodeServer { io: socket_io });
+    let context = Box::new(NetcodeServer {
+        io: socket_io,
+        simulation,
+    });
     unsafe { transmute(context) }
 }
 
@@ -24,6 +30,7 @@ pub extern "C" fn server_update(context: *mut NetcodeServer) {
     let server = unsafe { &mut *context };
 
     // tick server loop
+    server.simulation.step();
 
     loop {
         match server.io.try_recv() {
