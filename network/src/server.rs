@@ -23,6 +23,7 @@ pub extern "C" fn server_create() -> *mut NetcodeServer {
 #[no_mangle]
 pub extern "C" fn server_destroy(context: *mut NetcodeServer) {
     let _dropped: Box<NetcodeServer> = unsafe { transmute(context) };
+    _dropped.simulation.stop();
 }
 
 #[no_mangle]

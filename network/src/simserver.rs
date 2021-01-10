@@ -15,3 +15,13 @@ impl Context {
         self.head += 1;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Context;
+    #[test]
+    fn creation() {
+        let ctx = Context::start();
+        ctx.stop();
+    }
+}
