@@ -21,8 +21,9 @@ pub mod socketio {
     }
 
     impl Context {
-        pub fn new(local_addr: SocketAddr) -> Context {
+        pub fn new(mut local_addr: SocketAddr) -> (Context, u16) {
             let socket = UdpSocket::bind(local_addr).unwrap();
+            local_addr = socket.local_addr().unwrap();
             let recv_socket = socket.try_clone().unwrap();
 
             let (tx, rx): (Sender<Packet>, Receiver<Packet>) = mpsc::channel();
@@ -50,12 +51,16 @@ pub mod socketio {
                 }
             });
 
-            Context {
-                recv_thread: Some(thread),
-                read_rx: rx,
-                socket,
-                local_addr,
-            }
+            let local_port = local_addr.port();
+            (
+                Context {
+                    recv_thread: Some(thread),
+                    read_rx: rx,
+                    socket,
+                    local_addr,
+                },
+                local_port,
+            )
         }
 
         pub fn send(&self, buf: &[u8], dest: SocketAddr) -> std::io::Result<usize> {
@@ -87,13 +92,18 @@ mod tests {
     #[test]
     fn lifetime() {
         let addr = SocketAddr::from_str("127.0.0.1:8888").unwrap();
-        let _context = socketio::Context::new(addr);
+        let (_context, port) = socketio::Context::new(addr);
+        println!("socket opened on port: {}", port);
     }
 
     #[test]
     fn messaging() {
-        let addr = SocketAddr::from_str("127.0.0.1:9999").unwrap();
-        let context = socketio::Context::new(addr);
+        let hostname = [127, 0, 0, 1];
+        let mut addr = SocketAddr::from((hostname, 0));
+        let (context, port) = socketio::Context::new(addr);
+        println!("socket opened on port: {}", port);
+
+        addr = SocketAddr::from((hostname, port));
 
         let msg = "test";
         let size = context.send(msg.as_bytes(), addr).unwrap();

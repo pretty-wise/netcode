@@ -13,8 +13,8 @@ mod client {
 
     #[no_mangle]
     pub extern "C" fn client_create() -> *mut NetcodeClient {
-        let local_addr = SocketAddr::from_str("127.0.0.1:5050").unwrap();
-        let socket_io = socketio::Context::new(local_addr);
+        let local_addr = SocketAddr::from_str("127.0.0.1:0").unwrap();
+        let (socket_io, _port) = socketio::Context::new(local_addr);
 
         let context = Box::new(NetcodeClient {
             test: 2,

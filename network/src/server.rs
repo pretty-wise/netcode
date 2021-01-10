@@ -8,8 +8,8 @@ mod server {
 
     #[no_mangle]
     pub extern "C" fn server_create() -> *mut NetcodeServer {
-        let local_addr = SocketAddr::from_str("127.0.0.1:5050").unwrap();
-        let socket_io = socketio::Context::new(local_addr);
+        let local_addr = SocketAddr::from_str("127.0.0.1:0").unwrap();
+        let (socket_io, _port) = socketio::Context::new(local_addr);
         let context = Box::new(NetcodeServer { io: socket_io });
         unsafe { transmute(context) }
     }
