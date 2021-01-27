@@ -1,4 +1,5 @@
-pub mod cmd_buffer;
+mod actor_ids;
+mod cmd_buffer;
 mod simserver;
 
 use crate::shared::socketio;

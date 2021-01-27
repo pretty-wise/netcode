@@ -1,58 +1,9 @@
-use std::{collections::VecDeque, num::NonZeroI16, time};
+use std::{collections::VecDeque, time};
 
 use crate::shared::types::{FrameId, SimCommand, SimInput};
 
+use super::actor_ids::{self, ActorId, ActorIndex};
 use super::cmd_buffer;
-
-type ActorId = NonZeroI16;
-type ActorIndex = usize;
-
-struct ActorIds {
-    ids: Vec<Option<ActorId>>,
-    id_generator: i16,
-    capacity: i16,
-}
-
-impl ActorIds {
-    fn new(capacity: i16) -> ActorIds {
-        ActorIds {
-            ids: Vec::<Option<ActorId>>::with_capacity(capacity as usize),
-            id_generator: 0,
-            capacity,
-        }
-    }
-
-    fn find_index(&self, id: ActorId) -> Option<ActorIndex> {
-        self.ids.iter().position(|&value| value == Some(id))
-    }
-
-    fn add(&mut self) -> Option<(ActorId, ActorIndex)> {
-        if self.ids.len() == self.capacity as usize {
-            return None;
-        }
-
-        while let None = {
-            self.id_generator += 1;
-            NonZeroI16::new(self.id_generator)
-        } {}
-
-        let new_id = NonZeroI16::new(self.id_generator);
-        self.ids.push(new_id);
-        let index = self.ids.len() - 1;
-        Some((new_id.unwrap(), index))
-    }
-
-    fn remove(&mut self, id: ActorId) -> Option<ActorIndex> {
-        if let Some(index) = self.find_index(id) {
-            self.ids.swap_remove(index);
-            return Some(index);
-        }
-        None
-    }
-    fn count(&self) -> i16 {
-        self.ids.len() as i16
-    }
-}
 
 struct ActorData {
     // todo: remote entity id
@@ -151,7 +102,7 @@ impl World {
 }
 
 pub struct Simulation {
-    ids: ActorIds,
+    ids: actor_ids::ActorIds,
     main_world: World,
     control: Control,
 }
@@ -163,7 +114,7 @@ impl Simulation {
         capacity: i16,
     ) -> Simulation {
         Simulation {
-            ids: ActorIds::new(capacity),
+            ids: actor_ids::ActorIds::new(capacity),
             main_world: World::new(start_frame, capacity),
             control: Control::new(capacity, frame_duration),
         }
@@ -205,35 +156,10 @@ mod tests {
     use crate::shared::{FrameId, INVALID_FRAMEID};
 
     use super::Control;
+    use super::SimInput;
     use super::World;
-    use super::{ActorIds, SimInput};
     use std::time::Duration;
 
-    #[test]
-    fn ids() {
-        let mut list = ActorIds::new(4);
-        assert_eq!(list.count(), 0);
-        let id = list.add();
-        assert!(id.is_some());
-        assert_eq!(list.count(), 1);
-        list.remove(id.unwrap().0);
-        assert_eq!(list.count(), 0);
-
-        for i in 0..4 {
-            let id = list.add();
-            assert!(id.is_some());
-            let id = id.unwrap();
-            let index = list.find_index(id.0);
-            assert!(index.is_some());
-            assert_eq!(id.1, index.unwrap());
-            assert_eq!(list.count(), i + 1)
-        }
-
-        let id = list.add();
-        assert!(id.is_none());
-
-        assert_eq!(list.count(), 4);
-    }
     #[test]
     fn control_update() {
         let frame_duration = Duration::from_millis(16);
