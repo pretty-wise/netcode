@@ -1,6 +1,8 @@
 mod actor_ids;
 mod cmd_buffer;
+mod control;
 mod simserver;
+mod world;
 
 use crate::shared::socketio;
 use std::{mem::transmute, net::SocketAddr, str::FromStr, time};
