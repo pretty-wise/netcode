@@ -21,7 +21,7 @@ impl Buffer {
 
     pub fn add_commands(&mut self, commands: &[SimCommand], most_recent: FrameId) {
         let least_recent = most_recent - (commands.len() as i32 - 1);
-        let last_received_cmd = self.data.back().unwrap().clone();
+        let last_received_cmd = *self.data.back().unwrap();
 
         // fill in missing values
         for _ in self.most_recent + 1..least_recent {

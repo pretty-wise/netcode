@@ -1,6 +1,6 @@
-use std::time;
+use std::{num::NonZeroI16, time};
 
-use crate::shared::types::FrameId;
+use crate::shared::{types::FrameId, SimCommand};
 
 use super::world::World;
 use super::{
@@ -39,6 +39,24 @@ impl Simulation {
 
     pub fn stop(self) {}
 
+    pub fn read(&mut self, buffer: &[u8]) {
+        let current: FrameId = 0;
+
+        // parse buffer and push to ctrl and main_world.
+        if buffer[0] == 0 {
+            self.add_actor(current, "test");
+        } else if buffer[0] == 1 {
+            let actor: ActorId = NonZeroI16::new(1).unwrap();
+            self.remove_actor(actor);
+        } else if buffer[0] == 2 {
+            let actor: ActorId = NonZeroI16::new(1).unwrap();
+            if let Some(actor_index) = self.ids.find_index(actor) {
+                let commands = [SimCommand { buttons: 0 }];
+                self.control.add_commands(actor_index, &commands, current);
+            }
+        }
+    }
+
     pub fn add_actor(&mut self, current: FrameId, name: &'static str) -> Option<ActorId> {
         let (id, _) = self.ids.add()?;
 
@@ -48,59 +66,22 @@ impl Simulation {
     }
 
     pub fn remove_actor(&mut self, id: ActorId) {
-        match self.ids.remove(id) {
-            Some(index) => {
-                self.control.remove_actor(index);
-                self.main_world.remove_actor(index);
-            }
-            None => {}
+        if let Some(index) = self.ids.remove(id) {
+            self.control.remove_actor(index);
+            self.main_world.remove_actor(index);
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        server::world::World,
-        shared::{FrameId, SimInput},
-    };
+    use crate::{server::world::World, shared::FrameId};
 
     use super::Control;
     use std::time::Duration;
 
     #[test]
-    fn control_update() {
-        let frame_duration = Duration::from_millis(16);
-        let mut ctx = Control::new(2, frame_duration);
-        assert!(ctx.update(frame_duration).is_some());
-
-        assert!(ctx
-            .update(frame_duration - Duration::from_millis(1))
-            .is_none());
-
-        assert!(ctx.update(Duration::from_millis(1)).is_some());
-
-        assert!(ctx.update(2 * frame_duration).is_some());
-        assert!(ctx.update(Duration::from_millis(0)).is_some());
-        assert!(ctx.update(Duration::from_millis(0)).is_none());
-    }
-
-    #[test]
-    fn context_step() {
-        let start_frame = 0;
-        let mut ctx = World::new(start_frame, 8);
-        let input = Vec::<SimInput>::new();
-        assert_eq!(ctx.step(input), start_frame + 1);
-        let input = Vec::<SimInput>::new();
-        assert_eq!(ctx.step(input), start_frame + 2);
-        let input = Vec::<SimInput>::new();
-        assert_eq!(ctx.step(input), start_frame + 3);
-
-        ctx.stop();
-    }
-
-    #[test]
-    fn input_size() {
+    fn ctrl_world_integration() {
         const CAPACITY: i16 = 2;
         const DELTA: Duration = Duration::from_millis(16);
         const START_FRAME: FrameId = 0;

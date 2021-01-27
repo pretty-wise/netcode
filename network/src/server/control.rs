@@ -38,9 +38,11 @@ impl Control {
         self.actor_data.push(ActorData::new(current));
         self.actor_data.len() - 1
     }
+
     pub fn remove_actor(&mut self, index: ActorIndex) {
         self.actor_data.swap_remove(index);
     }
+
     pub fn add_commands(
         &mut self,
         actor_index: ActorIndex,
@@ -50,9 +52,7 @@ impl Control {
         let actor = &mut self.actor_data[actor_index];
         actor.cmd_buffer.add_commands(commands, frame);
     }
-    fn _remove_stale_input(&mut self, frame: FrameId) {
-        //
-    }
+
     pub fn update(&mut self, delta: time::Duration) -> Option<Vec<SimInput>> {
         self.time_accumulator += delta;
         match self.time_accumulator >= self.frame_duration {
@@ -68,5 +68,29 @@ impl Control {
             }
             false => None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use super::Control;
+
+    #[test]
+    fn update() {
+        let frame_duration = Duration::from_millis(16);
+        let mut ctx = Control::new(2, frame_duration);
+        assert!(ctx.update(frame_duration).is_some());
+
+        assert!(ctx
+            .update(frame_duration - Duration::from_millis(1))
+            .is_none());
+
+        assert!(ctx.update(Duration::from_millis(1)).is_some());
+
+        assert!(ctx.update(2 * frame_duration).is_some());
+        assert!(ctx.update(Duration::from_millis(0)).is_some());
+        assert!(ctx.update(Duration::from_millis(0)).is_none());
     }
 }

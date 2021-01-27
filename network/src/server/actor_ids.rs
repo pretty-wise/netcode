@@ -18,7 +18,7 @@ impl ActorIds {
         }
     }
 
-    fn find_index(&self, id: ActorId) -> Option<ActorIndex> {
+    pub fn find_index(&self, id: ActorId) -> Option<ActorIndex> {
         self.ids.iter().position(|&value| value == Some(id))
     }
 
@@ -27,10 +27,12 @@ impl ActorIds {
             return None;
         }
 
-        while let None = {
+        while {
             self.id_generator += 1;
             NonZeroI16::new(self.id_generator)
-        } {}
+        }
+        .is_none()
+        {}
 
         let new_id = NonZeroI16::new(self.id_generator);
         self.ids.push(new_id);

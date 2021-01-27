@@ -21,7 +21,7 @@ impl World {
 
     pub fn stop(self) {}
 
-    pub fn step(&mut self, input: Vec<SimInput>) -> FrameId {
+    pub fn step(&mut self, _input: Vec<SimInput>) -> FrameId {
         self.head += 1;
         self.head
     }
@@ -34,8 +34,25 @@ impl World {
     pub fn remove_actor(&mut self, index: ActorIndex) {
         self.actor_info.swap_remove(index);
     }
+}
 
-    pub fn head(&self) -> FrameId {
-        self.head
+#[cfg(test)]
+mod tests {
+    use crate::shared::SimInput;
+
+    use super::World;
+
+    #[test]
+    fn step() {
+        let start_frame = 0;
+        let mut ctx = World::new(start_frame, 8);
+        let input = Vec::<SimInput>::new();
+        assert_eq!(ctx.step(input), start_frame + 1);
+        let input = Vec::<SimInput>::new();
+        assert_eq!(ctx.step(input), start_frame + 2);
+        let input = Vec::<SimInput>::new();
+        assert_eq!(ctx.step(input), start_frame + 3);
+
+        ctx.stop();
     }
 }
