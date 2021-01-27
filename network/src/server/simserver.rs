@@ -1,9 +1,8 @@
 use std::{collections::VecDeque, num::NonZeroI16, time};
 
-use crate::{
-    cmd_buffer,
-    simshared::{FrameId, SimCommand, SimInput},
-};
+use crate::shared::types::{FrameId, SimCommand, SimInput};
+
+use super::cmd_buffer;
 
 type ActorId = NonZeroI16;
 type ActorIndex = usize;
@@ -203,11 +202,11 @@ impl Simulation {
 
 #[cfg(test)]
 mod tests {
-    use crate::simshared::{FrameId, INVALID_FRAMEID};
+    use crate::shared::{FrameId, INVALID_FRAMEID};
 
-    use super::{ActorData, World};
+    use super::Control;
+    use super::World;
     use super::{ActorIds, SimInput};
-    use super::{Control, SimCommand};
     use std::time::Duration;
 
     #[test]
@@ -298,40 +297,4 @@ mod tests {
 
         world.step(inputs);
     }
-
-    /*#[test]
-    fn input_frame() {
-        const CAPACITY: i16 = 2;
-        const DELTA: Duration = Duration::from_millis(16);
-        const START_FRAME: i32 = 0;
-
-        let mut ctrl = Control::new(CAPACITY, DELTA);
-        let mut world = World::new(START_FRAME, CAPACITY);
-
-        let actor_idx = ctrl.add_actor(START_FRAME);
-        assert_eq!(actor_idx, world.add_actor("first"));
-
-        let first_frame = START_FRAME + 1;
-        let second_frame = START_FRAME + 2;
-
-        let first_cmd = SimCommand { buttons: 1 };
-        let second_cmd = SimCommand { buttons: 2 };
-        ctrl.add_command(actor_idx, first_cmd.clone(), first_frame);
-        ctrl.add_command(actor_idx, second_cmd, second_frame);
-
-        let head = START_FRAME;
-        let first_frame_inputs = ctrl.update(DELTA, head);
-        assert!(first_frame_inputs.is_some());
-        let first_frame_inputs = first_frame_inputs.unwrap();
-        assert_eq!(first_frame_inputs.len(), 1);
-        let first_input = SimInput {
-            previous: SimCommand::default(),
-            current: first_cmd,
-        };
-        assert_eq!(first_frame_inputs[0], first_input);
-
-        assert_eq!(head + 1, first_frame);
-        assert_eq!(world.step(first_frame_inputs), first_frame);
-        let head = first_frame;
-    }*/
 }

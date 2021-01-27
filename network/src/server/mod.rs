@@ -1,5 +1,7 @@
-use crate::simserver;
-use crate::socketio;
+pub mod cmd_buffer;
+mod simserver;
+
+use crate::shared::socketio;
 use std::{mem::transmute, net::SocketAddr, str::FromStr, time};
 
 pub struct NetcodeServer {

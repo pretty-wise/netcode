@@ -1,4 +1,4 @@
-use crate::socketio;
+use crate::shared::socketio;
 use std::mem::transmute;
 use std::net::SocketAddr;
 use std::str::FromStr;

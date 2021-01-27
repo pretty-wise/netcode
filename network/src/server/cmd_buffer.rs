@@ -1,4 +1,4 @@
-use crate::simshared::{FrameId, SimCommand, SimInput};
+use crate::shared::{FrameId, SimCommand, SimInput};
 
 use std::collections::VecDeque;
 
@@ -74,7 +74,7 @@ impl Buffer {
 
 #[cfg(test)]
 mod tests {
-    use crate::simshared::{FrameId, SimCommand, SimInput};
+    use crate::shared::{FrameId, SimCommand, SimInput};
 
     use super::Buffer;
 
@@ -89,7 +89,7 @@ mod tests {
             previous: SimCommand::default(),
             current: SimCommand::default(),
         };
-        for i in 1..3 {
+        for _ in 1..3 {
             println!("before: {:?}", buffer.data);
             assert_eq!(buffer.consume_command(), expected_input);
             println!(" after: {:?}", buffer.data);
