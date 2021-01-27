@@ -150,8 +150,6 @@ mod tests {
         const START_FRAME: i32 = 0;
         let mut buffer = Buffer::new(START_FRAME);
 
-        let total_cmds = buffer.data.len();
-
         let initial_cmds = [
             SimCommand { buttons: 1 },
             SimCommand { buttons: 2 },
@@ -188,7 +186,7 @@ mod tests {
         }
 
         let last_cmd = initial_cmds[initial_cmds.len() - 1];
-        for i in 0..gap_size {
+        for _ in 0..gap_size {
             let expected_input = SimInput {
                 previous: last_cmd,
                 current: last_cmd,
@@ -230,8 +228,6 @@ mod tests {
     fn gap_fill() {
         const START_FRAME: i32 = 0;
         let mut buffer = Buffer::new(START_FRAME);
-
-        let total_cmds = buffer.data.len();
 
         let initial_cmds = [
             SimCommand { buttons: 1 },
