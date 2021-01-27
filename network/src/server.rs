@@ -1,17 +1,17 @@
 use crate::simserver;
 use crate::socketio;
-use std::{mem::transmute, net::SocketAddr, str::FromStr};
+use std::{mem::transmute, net::SocketAddr, str::FromStr, time};
 
 pub struct NetcodeServer {
     io: socketio::Context,
-    simulation: simserver::Context,
+    simulation: simserver::Simulation,
 }
 
 #[no_mangle]
 pub extern "C" fn server_create() -> *mut NetcodeServer {
     let local_addr = SocketAddr::from_str("127.0.0.1:0").unwrap();
     let (socket_io, _port) = socketio::Context::new(local_addr);
-    let simulation = simserver::Context::start();
+    let simulation = simserver::Simulation::start(0, time::Duration::from_millis(16), 8);
 
     let context = Box::new(NetcodeServer {
         io: socket_io,
@@ -21,31 +21,29 @@ pub extern "C" fn server_create() -> *mut NetcodeServer {
 }
 
 #[no_mangle]
-pub extern "C" fn server_destroy(context: *mut NetcodeServer) {
-    let _dropped: Box<NetcodeServer> = unsafe { transmute(context) };
+#[allow(clippy::missing_safety_doc)]
+pub unsafe extern "C" fn server_destroy(context: *mut NetcodeServer) {
+    let _dropped: Box<NetcodeServer> = transmute(context);
     _dropped.simulation.stop();
 }
 
 #[no_mangle]
-pub extern "C" fn server_update(context: *mut NetcodeServer) {
-    let server = unsafe { &mut *context };
+#[allow(clippy::missing_safety_doc)]
+pub unsafe extern "C" fn server_update(context: *mut NetcodeServer) {
+    let server = &mut *context;
 
     // tick server loop
-    server.simulation.step();
+    const UPDATE_DELTA: time::Duration = time::Duration::from_millis(16);
+    server.simulation.update(UPDATE_DELTA);
 
-    loop {
-        match server.io.try_recv() {
-            Ok(data) => {
-                println!(
-                    "server read {}({}) on main. time since recv: {}ms",
-                    data.nbytes,
-                    data.buffer.len(),
-                    data.recv_time.elapsed().as_millis()
-                );
-                continue;
-            }
-            Err(_) => break,
-        };
+    while let Ok(data) = server.io.try_recv() {
+        println!(
+            "server read {}({}) on main. time since recv: {}ms",
+            data.nbytes,
+            data.buffer.len(),
+            data.recv_time.elapsed().as_millis()
+        );
+        continue;
     }
 }
 
@@ -58,7 +56,7 @@ mod tests {
     fn instatiation() {
         let instance = server_create();
         assert!(!instance.is_null());
-        server_update(instance);
-        server_destroy(instance);
+        unsafe { server_update(instance) };
+        unsafe { server_destroy(instance) };
     }
 }

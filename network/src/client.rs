@@ -8,8 +8,6 @@ pub struct NetcodeClient {
     io: socketio::Context,
 }
 
-//3. DRY api for SocketIO to be used by the server
-
 #[no_mangle]
 pub extern "C" fn client_create() -> *mut NetcodeClient {
     let local_addr = SocketAddr::from_str("127.0.0.1:0").unwrap();
@@ -24,29 +22,25 @@ pub extern "C" fn client_create() -> *mut NetcodeClient {
 }
 
 #[no_mangle]
-pub extern "C" fn client_destroy(context: *mut NetcodeClient) {
-    let _dropped: Box<NetcodeClient> = unsafe { transmute(context) };
+#[allow(clippy::missing_safety_doc)]
+pub unsafe extern "C" fn client_destroy(context: *mut NetcodeClient) {
+    let _dropped: Box<NetcodeClient> = transmute(context);
 }
 
 #[no_mangle]
-pub extern "C" fn client_update(context: *mut NetcodeClient) {
-    let client = unsafe { &mut *context };
+#[allow(clippy::missing_safety_doc)]
+pub unsafe extern "C" fn client_update(context: *mut NetcodeClient) {
+    let client = &mut *context;
 
     client.test += 1;
 
-    loop {
-        match client.io.try_recv() {
-            Ok(data) => {
-                println!(
-                    "client read {}({}) on main. time since recv: {}ms",
-                    data.nbytes,
-                    data.buffer.len(),
-                    data.recv_time.elapsed().as_millis()
-                );
-                continue;
-            }
-            Err(_) => break,
-        };
+    while let Ok(data) = client.io.try_recv() {
+        println!(
+            "client read {}({}) on main. time since recv: {}ms",
+            data.nbytes,
+            data.buffer.len(),
+            data.recv_time.elapsed().as_millis()
+        );
     }
 }
 
@@ -59,7 +53,7 @@ mod tests {
     fn instatiation() {
         let instance = client_create();
         assert!(!instance.is_null());
-        client_update(instance);
-        client_destroy(instance);
+        unsafe { client_update(instance) };
+        unsafe { client_destroy(instance) };
     }
 }
