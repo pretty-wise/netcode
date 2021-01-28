@@ -66,10 +66,6 @@ impl Buffer {
         self.last_consumed += 1;
         result
     }
-
-    pub fn len(&self) -> usize {
-        self.data.len()
-    }
 }
 
 #[cfg(test)]
@@ -97,7 +93,7 @@ mod tests {
                 buffer.most_recent - buffer.last_consumed,
                 buffer.data.len() as i32
             );
-            assert_eq!(buffer.len(), 1);
+            assert_eq!(buffer.data.len(), 1);
         }
     }
 

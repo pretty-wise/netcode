@@ -47,9 +47,6 @@ impl ActorIds {
         }
         None
     }
-    pub fn count(&self) -> i16 {
-        self.ids.len() as i16
-    }
 }
 
 #[cfg(test)]
@@ -59,12 +56,12 @@ mod tests {
     #[test]
     fn ids() {
         let mut list = ActorIds::new(4);
-        assert_eq!(list.count(), 0);
+        assert_eq!(list.ids.len(), 0);
         let id = list.add();
         assert!(id.is_some());
-        assert_eq!(list.count(), 1);
+        assert_eq!(list.ids.len(), 1);
         list.remove(id.unwrap().0);
-        assert_eq!(list.count(), 0);
+        assert_eq!(list.ids.len(), 0);
 
         for i in 0..4 {
             let id = list.add();
@@ -73,12 +70,12 @@ mod tests {
             let index = list.find_index(id.0);
             assert!(index.is_some());
             assert_eq!(id.1, index.unwrap());
-            assert_eq!(list.count(), i + 1)
+            assert_eq!(list.ids.len(), i + 1)
         }
 
         let id = list.add();
         assert!(id.is_none());
 
-        assert_eq!(list.count(), 4);
+        assert_eq!(list.ids.len(), 4);
     }
 }
