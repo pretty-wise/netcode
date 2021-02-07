@@ -16,7 +16,7 @@ pub struct NetcodeServer {
 pub extern "C" fn server_create() -> *mut NetcodeServer {
     let local_addr = SocketAddr::from_str("127.0.0.1:0").unwrap();
     let (socket_io, _port) = socketio::Context::new(local_addr);
-    let simulation = simulation::Simulation::start(0, time::Duration::from_millis(16), 8);
+    let simulation = simulation::Simulation::start(0, time::Duration::from_millis(16), 8, 8);
 
     let context = Box::new(NetcodeServer {
         io: socket_io,

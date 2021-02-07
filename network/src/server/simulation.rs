@@ -19,10 +19,11 @@ impl Simulation {
         start_frame: FrameId,
         frame_duration: time::Duration,
         capacity: i16,
+        object_cap: i16,
     ) -> Simulation {
         Simulation {
             ids: ActorIds::new(capacity),
-            main_world: World::new(start_frame, capacity),
+            main_world: World::new(start_frame, capacity, object_cap),
             control: Control::new(capacity, frame_duration),
         }
     }
@@ -86,7 +87,7 @@ mod tests {
         const DELTA: Duration = Duration::from_millis(16);
         const START_FRAME: FrameId = 0;
         let mut ctrl = Control::new(CAPACITY, DELTA);
-        let mut world = World::new(START_FRAME, CAPACITY);
+        let mut world = World::new(START_FRAME, CAPACITY, 0);
 
         assert_eq!(ctrl.add_actor(START_FRAME), world.add_actor("first"));
 
